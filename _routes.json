@@ -1,5 +1,0 @@
-'EOF'
-  {
-    "version": 1,                                                                                                           "include": ["/api/*"],
-    "exclude": ["/css/*", "/js/*", "/index.html"]                                                                         }
-  EOF

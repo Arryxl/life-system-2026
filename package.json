@@ -4,9 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "wrangler pages dev public --compatibility-date=2024-11-01",
-    "deploy": "wrangler pages deploy public",
-    "build": "echo 'Build complete'",
-    "dev": "wrangler pages dev public --compatibility-date=2024-11-01",
     "deploy": "wrangler pages deploy public"
   },
   "dependencies": {
