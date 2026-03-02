@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Life System 2026</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-icon">⬡</span>
+      <div>
+        <div class="logo-title">LIFE SYSTEM</div>
+        <div class="logo-year">2026</div>
+      </div>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" data-module="dashboard">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Dashboard</span>
+      </li>
+      <li class="nav-item" data-module="finances">
+        <span class="nav-icon">◉</span>
+        <span class="nav-label">Finanzas</span>
+      </li>
+      <li class="nav-item" data-module="physical">
+        <span class="nav-icon">◐</span>
+        <span class="nav-label">Físico</span>
+      </li>
+      <li class="nav-item" data-module="schedule">
+        <span class="nav-icon">◷</span>
+        <span class="nav-label">Horario</span>
+      </li>
+      <li class="nav-item" data-module="vision">
+        <span class="nav-icon">◎</span>
+        <span class="nav-label">Visión</span>
+      </li>
+      <li class="nav-item" data-module="rules">
+        <span class="nav-icon">◆</span>
+        <span class="nav-label">Reglas</span>
+      </li>
+      <li class="nav-item" data-module="tracking">
+        <span class="nav-icon">◈</span>
+        <span class="nav-label">Seguimiento</span>
+      </li>
+      <li class="nav-item" data-module="sunday">
+        <span class="nav-icon">◑</span>
+        <span class="nav-label">Revisión</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="current-date" id="currentDate"></div>
+      <div class="sidebar-version">v1.0.0</div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content" id="mainContent">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="discipline-badge" id="topDiscipline">
+          <span class="badge-label">Disciplina</span>
+          <span class="badge-value" id="disciplineValue">—</span>
+        </div>
+        <div class="day-indicator" id="dayIndicator"></div>
+      </div>
+    </header>
+
+    <!-- MODULE: DASHBOARD -->
+    <section class="module active" id="mod-dashboard">
+      <div class="module-inner">
+
+        <!-- KPI ROW -->
+        <div class="kpi-grid">
+          <div class="kpi-card accent-blue">
+            <div class="kpi-label">Ingreso Neto</div>
+            <div class="kpi-value">$1.850.000</div>
+            <div class="kpi-sub">COP / mes</div>
+          </div>
+          <div class="kpi-card accent-green">
+            <div class="kpi-label">Fondo de Emergencia</div>
+            <div class="kpi-value" id="kpi-fund">$0</div>
+            <div class="kpi-sub">Meta: $3.000.000</div>
+          </div>
+          <div class="kpi-card accent-gray">
+            <div class="kpi-label">Proteína Hoy</div>
+            <div class="kpi-value" id="kpi-protein">0g</div>
+            <div class="kpi-sub">Meta: 100g</div>
+          </div>
+          <div class="kpi-card accent-orange">
+            <div class="kpi-label">Racha Gym</div>
+            <div class="kpi-value" id="kpi-streak">0</div>
+            <div class="kpi-sub">semanas seguidas</div>
+          </div>
+        </div>
+
+        <!-- CHARTS ROW -->
+        <div class="charts-row">
+          <!-- Radar -->
+          <div class="card chart-card">
+            <div class="card-header">
+              <span class="card-title">Equilibrio de Vida</span>
+              <span class="card-badge">Esta semana</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Fund progress -->
+          <div class="card chart-card">
+            <div class="card-header">
+              <span class="card-title">Proyección Financiera</span>
+              <span class="card-badge">Mar → Dic 2026</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="financeChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATUS ROW -->
+        <div class="status-row">
+          <!-- Debt timeline -->
+          <div class="card flex-1">
+            <div class="card-header">
+              <span class="card-title">Línea de Deudas</span>
+            </div>
+            <div class="debt-timeline" id="debtTimeline"></div>
+          </div>
+
+          <!-- Today's schedule -->
+          <div class="card flex-1">
+            <div class="card-header">
+              <span class="card-title">Agenda de Hoy</span>
+            </div>
+            <div class="today-agenda" id="todayAgenda"></div>
+          </div>
+
+          <!-- Rules reminder -->
+          <div class="card flex-1">
+            <div class="card-header">
+              <span class="card-title">Reglas Hoy</span>
+            </div>
+            <div class="rules-reminder" id="rulesReminder"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: FINANCES -->
+    <section class="module" id="mod-finances">
+      <div class="module-inner">
+
+        <div class="finance-mode-banner" id="financeModeBanner"></div>
+
+        <div class="two-col">
+          <!-- 1-15 -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Gastos 1 – 15</span>
+              <span class="card-badge period-badge">$920.000 aprox.</span>
+            </div>
+            <div class="expense-list" id="expenses-1-15"></div>
+          </div>
+          <!-- 15-30 -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Gastos 15 – 30</span>
+              <span class="card-badge period-badge">$920.000 aprox.</span>
+            </div>
+            <div class="expense-list" id="expenses-15-30"></div>
+          </div>
+        </div>
+
+        <!-- Debt cards -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Deudas con Fecha de Liberación</span>
+          </div>
+          <div class="debt-cards" id="debtCards"></div>
+        </div>
+
+        <!-- Anti-impulse system -->
+        <div class="card mt-16 anti-impulse-card">
+          <div class="lock-icon">🔒</div>
+          <div class="card-header">
+            <span class="card-title">FONDO INTOCABLE</span>
+          </div>
+          <div class="fund-display">
+            <div class="fund-amount" id="fundAmount">$0</div>
+            <div class="fund-meta">Meta final: $3.000.000</div>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="fundProgress" style="width:0%"></div>
+          </div>
+          <div class="fund-controls">
+            <input type="number" id="fundInput" class="fund-input" placeholder="Monto a depositar..." />
+            <button class="btn-primary" onclick="depositFund()">Depositar</button>
+          </div>
+          <div class="anti-impulse-rule">
+            ⚠ Regla 30 días: Ninguna compra &gt; $200.000 sin esperar 30 días
+          </div>
+        </div>
+
+        <!-- Post-July projection -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Simulador Post-Julio</span>
+            <span class="card-badge accent-green-badge">+$700.000 liberados</span>
+          </div>
+          <div class="projection-grid" id="projectionGrid"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: PHYSICAL -->
+    <section class="module" id="mod-physical">
+      <div class="module-inner">
+
+        <div class="physical-stats">
+          <div class="stat-pill">
+            <span class="stat-label">Peso</span>
+            <span class="stat-val" id="currentWeight">72 kg</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">Altura</span>
+            <span class="stat-val">1.81 m</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">IMC</span>
+            <span class="stat-val" id="currentBMI">22.0</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-label">Objetivo</span>
+            <span class="stat-val">Masa magra</span>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Protein tracker -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Proteína Diaria</span>
+              <span class="card-badge">Meta: 100g</span>
+            </div>
+            <div class="protein-tracker">
+              <div class="protein-ring-wrap">
+                <canvas id="proteinRing" width="160" height="160"></canvas>
+                <div class="protein-center" id="proteinCenter">0g</div>
+              </div>
+              <div class="protein-sources" id="proteinSources"></div>
+            </div>
+            <div class="protein-controls">
+              <select id="proteinSelect" class="fund-input">
+                <option value="">Añadir alimento...</option>
+                <option value="4-eggs">4 huevos (28g)</option>
+                <option value="200g-chicken">200g pollo (44g)</option>
+                <option value="200g-tuna">200g atún (40g)</option>
+                <option value="1-glass-milk">1 vaso leche (8g)</option>
+                <option value="100g-lentils">100g lentejas (9g)</option>
+                <option value="custom">Personalizado...</option>
+              </select>
+              <button class="btn-primary" onclick="addProtein()">+ Añadir</button>
+            </div>
+            <div id="customProteinWrap" class="custom-protein-wrap hidden">
+              <input type="text" id="customProteinName" class="fund-input" placeholder="Nombre alimento" />
+              <input type="number" id="customProteinGrams" class="fund-input" placeholder="Gramos de proteína" />
+            </div>
+          </div>
+
+          <!-- Workout log -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Entrenamientos</span>
+              <span class="card-badge">Esta semana</span>
+            </div>
+            <div class="workout-week" id="workoutWeek"></div>
+            <div class="workout-log-controls">
+              <select id="workoutType" class="fund-input">
+                <option value="">Seleccionar sesión...</option>
+                <option value="chest">Pecho + Tríceps</option>
+                <option value="back">Espalda + Bíceps</option>
+                <option value="legs">Pierna</option>
+                <option value="shoulders">Hombros + Complementos</option>
+                <option value="abs">Abdominales (mañana)</option>
+                <option value="mobility">Movilidad ligera</option>
+                <option value="rest">Descanso activo</option>
+              </select>
+              <button class="btn-primary" onclick="logWorkout()">✓ Registrar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weight log -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Evolución de Peso</span>
+            <span class="card-badge">Semanal</span>
+          </div>
+          <div class="weight-controls">
+            <input type="number" id="weightInput" step="0.1" class="fund-input" placeholder="Peso actual (kg)" />
+            <button class="btn-primary" onclick="logWeight()">Registrar Peso</button>
+          </div>
+          <div class="chart-wrap-sm">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Consistency heatmap -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Consistencia — Últimas 12 Semanas</span>
+          </div>
+          <div class="heatmap" id="consistencyHeatmap"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: SCHEDULE -->
+    <section class="module" id="mod-schedule">
+      <div class="module-inner">
+
+        <div class="week-nav">
+          <button class="btn-ghost" onclick="prevWeek()">← Semana Anterior</button>
+          <span class="week-label" id="weekLabel">Semana actual</span>
+          <button class="btn-ghost" onclick="nextWeek()">Semana Siguiente →</button>
+        </div>
+
+        <div class="schedule-grid" id="scheduleGrid"></div>
+
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Rutina Gym — Distribución Semanal</span>
+          </div>
+          <div class="gym-split" id="gymSplit"></div>
+        </div>
+
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Reglas de Horario — No Negociables</span>
+          </div>
+          <div class="schedule-rules" id="scheduleRules"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: VISION -->
+    <section class="module" id="mod-vision">
+      <div class="module-inner">
+
+        <div class="vision-header">
+          <div class="vision-identity">
+            <div class="identity-label">Declaración de Identidad</div>
+            <div class="identity-text" id="identityText" contenteditable="true">
+              Soy un hombre que construye disciplina con constancia. Priorizo lo que importa,
+              protejo mi energía y avanzo cada día hacia una versión más fuerte de mí mismo.
+              Antes de diciembre 2026, habré transformado mi cuerpo, estabilizado mis finanzas
+              y fortalecido lo que más valoro.
+            </div>
+            <button class="btn-ghost save-btn" onclick="saveIdentity()">Guardar</button>
+          </div>
+        </div>
+
+        <!-- Priority hierarchy -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Jerarquía de Prioridades 2026</span>
+          </div>
+          <div class="priority-list" id="priorityList"></div>
+        </div>
+
+        <!-- Goals 2026 -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Metas 2026</span>
+          </div>
+          <div class="goals-list" id="goalsList"></div>
+          <div class="goal-add-row">
+            <input type="text" id="goalInput" class="fund-input" placeholder="Nueva meta..." />
+            <button class="btn-primary" onclick="addGoal()">+ Añadir</button>
+          </div>
+        </div>
+
+        <!-- Principles -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Principios Personales</span>
+          </div>
+          <div class="principles-list" id="principlesList"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: RULES -->
+    <section class="module" id="mod-rules">
+      <div class="module-inner">
+
+        <div class="rules-header">
+          <div class="rules-title-big">REGLAS NO NEGOCIABLES</div>
+          <div class="rules-subtitle">Sistema de disciplina personal — 2026</div>
+        </div>
+
+        <div class="rules-grid" id="rulesGrid"></div>
+
+        <!-- 30 day rule tracker -->
+        <div class="card mt-16">
+          <div class="card-header">
+            <span class="card-title">Regla 30 Días — Compras Mayores a $200.000</span>
+          </div>
+          <div class="impulse-tracker" id="impulseTracker"></div>
+          <div class="impulse-add">
+            <input type="text" id="impulseItem" class="fund-input" placeholder="Artículo que quieres comprar..." />
+            <input type="number" id="impulseAmount" class="fund-input" placeholder="Valor (COP)" />
+            <button class="btn-primary" onclick="addImpulseItem()">Registrar Deseo</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: TRACKING -->
+    <section class="module" id="mod-tracking">
+      <div class="module-inner">
+
+        <div class="tracking-nav">
+          <div class="month-tabs" id="monthTabs"></div>
+        </div>
+
+        <div class="tracking-content" id="trackingContent"></div>
+
+      </div>
+    </section>
+
+    <!-- MODULE: SUNDAY REVIEW -->
+    <section class="module" id="mod-sunday">
+      <div class="module-inner">
+
+        <div class="sunday-header">
+          <div class="sunday-icon">◑</div>
+          <div class="sunday-title">Panel de Revisión Dominical</div>
+          <div class="sunday-sub">Reflexión · Planificación · Ajuste</div>
+        </div>
+
+        <div class="review-grid">
+          <!-- Finanzas -->
+          <div class="card review-card">
+            <div class="card-header"><span class="card-title">💰 Finanzas</span></div>
+            <div class="review-item">
+              <label>¿Seguí el presupuesto esta semana?</label>
+              <div class="radio-group">
+                <button class="radio-btn" data-key="budget" data-val="yes">Sí</button>
+                <button class="radio-btn" data-key="budget" data-val="partial">Parcial</button>
+                <button class="radio-btn" data-key="budget" data-val="no">No</button>
+              </div>
+            </div>
+            <div class="review-item">
+              <label>Gastos extra no planeados (COP)</label>
+              <input type="number" class="fund-input" id="extraSpend" placeholder="0" />
+            </div>
+          </div>
+
+          <!-- Físico -->
+          <div class="card review-card">
+            <div class="card-header"><span class="card-title">💪 Físico</span></div>
+            <div class="review-item">
+              <label>Sesiones de gym esta semana</label>
+              <div class="counter-row">
+                <button class="counter-btn" onclick="adjustCounter('gymSessions',-1)">−</button>
+                <span class="counter-val" id="gymSessions">0</span>
+                <button class="counter-btn" onclick="adjustCounter('gymSessions',1)">+</button>
+              </div>
+            </div>
+            <div class="review-item">
+              <label>Abdominales realizadas</label>
+              <div class="counter-row">
+                <button class="counter-btn" onclick="adjustCounter('abSessions',-1)">−</button>
+                <span class="counter-val" id="abSessions">0</span>
+                <button class="counter-btn" onclick="adjustCounter('abSessions',1)">+</button>
+              </div>
+            </div>
+            <div class="review-item">
+              <label>Proteína promedio (g/día)</label>
+              <input type="number" class="fund-input" id="avgProtein" placeholder="0" />
+            </div>
+          </div>
+
+          <!-- Disciplina -->
+          <div class="card review-card">
+            <div class="card-header"><span class="card-title">⚡ Disciplina</span></div>
+            <div class="discipline-meter">
+              <div class="discipline-label">Nivel de disciplina esta semana</div>
+              <input type="range" id="disciplineSlider" min="0" max="100" value="50"
+                oninput="updateDisciplineDisplay(this.value)" />
+              <div class="discipline-display" id="disciplineDisplay">50%</div>
+            </div>
+            <div class="review-item">
+              <label>Horas sueño promedio</label>
+              <input type="number" step="0.5" class="fund-input" id="avgSleep" placeholder="7" />
+            </div>
+          </div>
+
+          <!-- Espiritual / Relación -->
+          <div class="card review-card">
+            <div class="card-header"><span class="card-title">❤️ Espiritual · Relación</span></div>
+            <div class="review-item">
+              <label>Estudios bíblicos esta semana</label>
+              <div class="counter-row">
+                <button class="counter-btn" onclick="adjustCounter('bibleStudy',-1)">−</button>
+                <span class="counter-val" id="bibleStudy">0</span>
+                <button class="counter-btn" onclick="adjustCounter('bibleStudy',1)">+</button>
+              </div>
+            </div>
+            <div class="review-item">
+              <label>Tiempo de calidad con pareja</label>
+              <div class="radio-group">
+                <button class="radio-btn" data-key="relationship" data-val="great">Excelente</button>
+                <button class="radio-btn" data-key="relationship" data-val="ok">OK</button>
+                <button class="radio-btn" data-key="relationship" data-val="poor">Mejorar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes + next week -->
+        <div class="two-col mt-16">
+          <div class="card">
+            <div class="card-header"><span class="card-title">Reflexión de la Semana</span></div>
+            <textarea id="weekReflection" class="review-textarea" placeholder="¿Qué salió bien? ¿Qué mejorar?"></textarea>
+          </div>
+          <div class="card">
+            <div class="card-header"><span class="card-title">Enfoque Próxima Semana</span></div>
+            <textarea id="nextWeekFocus" class="review-textarea" placeholder="Top 3 prioridades de la semana siguiente..."></textarea>
+          </div>
+        </div>
+
+        <div class="sunday-save-row">
+          <button class="btn-primary btn-large" onclick="saveWeeklyReview()">Guardar Revisión</button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
