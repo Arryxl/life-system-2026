@@ -32,48 +32,80 @@ const weekStart = () => {
 };
 
 // ============================================================
+// GET /api/health — diagnóstico (env vars + conexión)
+// ============================================================
+app.get('/health', async (c) => {
+  const hasUrl = !!c.env.SUPABASE_URL;
+  const hasKey = !!c.env.SUPABASE_SERVICE_KEY;
+  if (!hasUrl || !hasKey) {
+    return c.json({ ok: false, error: 'Missing env vars', SUPABASE_URL: hasUrl, SUPABASE_SERVICE_KEY: hasKey }, 500);
+  }
+  try {
+    const supabase = sb(c.env);
+    const { error } = await supabase.from('fund').select('id').limit(1);
+    if (error) return c.json({ ok: false, error: error.message }, 500);
+    return c.json({ ok: true, SUPABASE_URL: hasUrl, SUPABASE_SERVICE_KEY: hasKey });
+  } catch(e) {
+    return c.json({ ok: false, error: e.message }, 500);
+  }
+});
+
+// ============================================================
 // GET /api/state — Estado completo (carga inicial)
 // ============================================================
 app.get('/state', async (c) => {
-  const supabase = sb(c.env);
+  if (!c.env.SUPABASE_URL || !c.env.SUPABASE_SERVICE_KEY) {
+    return c.json({ error: 'Variables de entorno SUPABASE_URL y SUPABASE_SERVICE_KEY no configuradas en Cloudflare Pages' }, 500);
+  }
+  try {
+    const supabase = sb(c.env);
 
-  const [
-    { data: fund },
-    { data: proteinToday },
-    { data: workoutsWeek },
-    { data: workoutsAll },
-    { data: weightHistory },
-    { data: goals },
-    { data: identity },
-    { data: impulseItems },
-    { data: settings },
-  ] = await Promise.all([
-    supabase.from('fund').select('amount').eq('id', 1).single(),
-    supabase.from('protein_log').select('*').eq('date', today()).order('created_at'),
-    supabase.from('workout_log').select('*').gte('date', weekStart()).order('created_at'),
-    supabase.from('workout_log').select('*').order('created_at', { ascending: false }).limit(300),
-    supabase.from('weight_log').select('*').order('date', { ascending: false }).limit(20),
-    supabase.from('goals').select('*').order('position').order('id'),
-    supabase.from('identity_text').select('content').eq('id', 1).single(),
-    supabase.from('impulse_items').select('*').order('created_at', { ascending: false }),
-    supabase.from('settings').select('key, value'),
-  ]);
+    const [
+      { data: fund,         error: e1 },
+      { data: proteinToday, error: e2 },
+      { data: workoutsWeek, error: e3 },
+      { data: workoutsAll,  error: e4 },
+      { data: weightHistory,error: e5 },
+      { data: goals,        error: e6 },
+      { data: identity,     error: e7 },
+      { data: impulseItems, error: e8 },
+      { data: settings,     error: e9 },
+    ] = await Promise.all([
+      supabase.from('fund').select('amount').eq('id', 1).single(),
+      supabase.from('protein_log').select('*').eq('date', today()).order('created_at'),
+      supabase.from('workout_log').select('*').gte('date', weekStart()).order('created_at'),
+      supabase.from('workout_log').select('*').order('created_at', { ascending: false }).limit(300),
+      supabase.from('weight_log').select('*').order('date', { ascending: false }).limit(20),
+      supabase.from('goals').select('*').order('position').order('id'),
+      supabase.from('identity_text').select('content').eq('id', 1).single(),
+      supabase.from('impulse_items').select('*').order('created_at', { ascending: false }),
+      supabase.from('settings').select('key, value'),
+    ]);
 
-  // Convertir settings array → objeto
-  const cfg = {};
-  settings?.forEach(r => { cfg[r.key] = r.value; });
+    const firstError = e1||e2||e3||e4||e5||e6||e7||e8||e9;
+    if (firstError && firstError.code !== 'PGRST116') {
+      // PGRST116 = row not found (normal for empty tables)
+      return c.json({ error: firstError.message, code: firstError.code }, 500);
+    }
 
-  return c.json({
-    fund:             fund?.amount || 0,
-    weight:           { current: weightHistory?.[0]?.weight || 72, history: weightHistory || [] },
-    protein:          { today: proteinToday || [] },
-    workouts:         { week: workoutsWeek || [], all: workoutsAll || [] },
-    goals:            goals || [],
-    identity:         identity?.content || null,
-    impulseItems:     impulseItems || [],
-    radarScores:      cfg.radarScores   || { rel:5, spirit:5, physical:5, work:5, pos:5, leisure:5 },
-    disciplineHistory: cfg.disciplineHistory || [],
-  });
+    // Convertir settings array → objeto
+    const cfg = {};
+    settings?.forEach(r => { cfg[r.key] = r.value; });
+
+    return c.json({
+      fund:              fund?.amount || 0,
+      weight:            { current: weightHistory?.[0]?.weight || 72, history: weightHistory || [] },
+      protein:           { today: proteinToday || [] },
+      workouts:          { week: workoutsWeek || [], all: workoutsAll || [] },
+      goals:             goals || [],
+      identity:          identity?.content || null,
+      impulseItems:      impulseItems || [],
+      radarScores:       cfg.radarScores    || { rel:5, spirit:5, physical:5, work:5, pos:5, leisure:5 },
+      disciplineHistory: cfg.disciplineHistory || [],
+    });
+  } catch(e) {
+    return c.json({ error: e.message }, 500);
+  }
 });
 
 // ============================================================
