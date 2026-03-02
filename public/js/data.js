@@ -218,7 +218,7 @@ const WEEKLY_SCHEDULE = {
       { time: '12:30–1:30',  desc: '🍗 Almuerzo (200g pollo)', type: 'sleep' },
       { time: '1:00–5:30',   desc: '💼 Trabajo estructurado',  type: 'work' },
       { time: '6:00–7:45',   desc: '🏋️ Gym — Hombros + Complementos', type: 'gym' },
-      { time: '8:15–9:15',   desc: '🎮 Juego',                 type: 'game' },
+      { time: '8:15–9:15',   desc: '💻 POS',                         type: 'pos' },
       { time: '9:15–9:45',   desc: '📖 Estudio bíblico',       type: 'spirit' },
       { time: '9:45–10:30',  desc: '❤️ Tiempo con pareja',     type: 'rel' },
       { time: '10:45',       desc: '😴 Dormir',                type: 'sleep' },
