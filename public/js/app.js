@@ -806,53 +806,70 @@ async function showTrackingMonth(month, tabEl) {
           <div class="tracking-metric"><span class="tracking-metric-label">Meta fondo acumulado</span>
             <span class="tracking-metric-value">${plan.fundTarget ? formatCOP(plan.fundTarget) : '—'}</span></div>
           <div class="tracking-metric"><span class="tracking-metric-label">¿Presupuesto cumplido?</span>
-            <input class="tracking-input" value="${data.budgetOk||''}"
-              onchange="saveTracking('${month}','budgetOk',this.value)" placeholder="Sí / No" /></div>
+            <input class="tracking-input" data-key="budgetOk" value="${data.budgetOk||''}" placeholder="Sí / No" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Gastos extra (COP)</span>
-            <input class="tracking-input" type="number" value="${data.extraSpend||''}"
-              onchange="saveTracking('${month}','extraSpend',this.value)" placeholder="0" /></div>
+            <input class="tracking-input" type="number" data-key="extraSpend" value="${data.extraSpend||''}" placeholder="0" /></div>
         </div>
         <div class="tracking-section">
           <div class="tracking-section-title">💪 Físico — ${month}</div>
           <div class="tracking-metric"><span class="tracking-metric-label">Peso final (kg)</span>
-            <input class="tracking-input" type="number" value="${data.weightEnd||''}"
-              onchange="saveTracking('${month}','weightEnd',this.value)" placeholder="72" /></div>
+            <input class="tracking-input" type="number" data-key="weightEnd" value="${data.weightEnd||''}" placeholder="72" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Proteína promedio (g/día)</span>
-            <input class="tracking-input" type="number" value="${data.avgProtein||''}"
-              onchange="saveTracking('${month}','avgProtein',this.value)" placeholder="100" /></div>
+            <input class="tracking-input" type="number" data-key="avgProtein" value="${data.avgProtein||''}" placeholder="100" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Sesiones de gym</span>
-            <input class="tracking-input" type="number" value="${data.gymSessions||''}"
-              onchange="saveTracking('${month}','gymSessions',this.value)" placeholder="0" /></div>
+            <input class="tracking-input" type="number" data-key="gymSessions" value="${data.gymSessions||''}" placeholder="0" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Sesiones abdominales</span>
-            <input class="tracking-input" type="number" value="${data.abSessions||''}"
-              onchange="saveTracking('${month}','abSessions',this.value)" placeholder="0" /></div>
+            <input class="tracking-input" type="number" data-key="abSessions" value="${data.abSessions||''}" placeholder="0" /></div>
         </div>
         <div class="tracking-section">
           <div class="tracking-section-title">⚡ Disciplina — ${month}</div>
           <div class="tracking-metric"><span class="tracking-metric-label">Nivel disciplina (%)</span>
-            <input class="tracking-input" type="number" value="${data.discipline||''}"
-              onchange="saveTracking('${month}','discipline',this.value)" placeholder="0–100" /></div>
+            <input class="tracking-input" type="number" data-key="discipline" value="${data.discipline||''}" placeholder="0–100" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Horas sueño promedio</span>
-            <input class="tracking-input" type="number" value="${data.avgSleep||''}"
-              onchange="saveTracking('${month}','avgSleep',this.value)" placeholder="7" /></div>
+            <input class="tracking-input" type="number" data-key="avgSleep" value="${data.avgSleep||''}" placeholder="7" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Estudios bíblicos</span>
-            <input class="tracking-input" type="number" value="${data.bibleStudy||''}"
-              onchange="saveTracking('${month}','bibleStudy',this.value)" placeholder="0" /></div>
+            <input class="tracking-input" type="number" data-key="bibleStudy" value="${data.bibleStudy||''}" placeholder="0" /></div>
           <div class="tracking-metric"><span class="tracking-metric-label">Notas del mes</span></div>
-          <textarea class="review-textarea" style="margin-top:6px"
-            onchange="saveTracking('${month}','notes',this.value)"
+          <textarea class="review-textarea" data-key="notes" style="margin-top:6px"
             placeholder="Reflexión mensual...">${data.notes||''}</textarea>
         </div>
+        <div style="padding:16px 0 4px;display:flex;align-items:center;gap:12px;justify-content:flex-end;">
+          <span id="trackingDirtyMsg" style="font-size:11px;color:var(--orange);display:none;">Cambios sin guardar</span>
+          <button id="saveTrackingBtn" class="btn" onclick="saveTrackingMonth('${month}')">Guardar mes</button>
+        </div>
       </div>`;
+
+    el.querySelectorAll('[data-key]').forEach(inp => {
+      inp.addEventListener('input', () => {
+        const msg = document.getElementById('trackingDirtyMsg');
+        const btn = document.getElementById('saveTrackingBtn');
+        if (msg) msg.style.display = 'inline';
+        if (btn) { btn.style.background = 'var(--orange)'; btn.textContent = 'Guardar mes'; }
+      });
+    });
   } catch(e) {
     el.innerHTML = '<div style="padding:20px;color:var(--red);font-size:12px;">Error al cargar datos</div>';
   }
 }
 
-async function saveTracking(month, key, value) {
+async function saveTrackingMonth(month) {
+  const btn = document.getElementById('saveTrackingBtn');
+  const msg = document.getElementById('trackingDirtyMsg');
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; btn.style.background = ''; }
   try {
-    await api.post('/api/tracking', { month, key, value });
-  } catch(e) { showToast('Error al guardar', 'error'); }
+    const saves = [];
+    document.querySelectorAll('#trackingContent [data-key]').forEach(inp => {
+      saves.push(api.post('/api/tracking', { month, key: inp.dataset.key, value: inp.value }));
+    });
+    await Promise.all(saves);
+    if (msg) msg.style.display = 'none';
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardado ✓'; btn.style.background = 'var(--green)'; }
+    showToast('Seguimiento de ' + month + ' guardado', 'success');
+    setTimeout(() => { if (btn) { btn.textContent = 'Guardar mes'; btn.style.background = ''; } }, 2500);
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar mes'; }
+    showToast('Error al guardar', 'error');
+  }
 }
 
 // ============================================================
